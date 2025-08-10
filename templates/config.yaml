@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adguard-sync-config
+data: 
+  adguardhome-sync.yaml: |
+    {{- with .Values.config }}
+    #cron expression to run in daemon mode. (default; "" = runs only once)
+    cron: {{ .cron }}
+
+    # runs the synchronisation on startup
+    runOnStart: {{ .runOnStart }}
+
+    # If enabled, the synchronisation task will not fail on single errors, but will log the errors and continue
+    continueOnError: {{ .continueOnError }}
+
+    origin:
+      # url of the origin instance
+      url: {{ .origin.url }}
+      apiPath: {{ .origin.apiPath }}
+      insecureSkipVerify: {{ .origin.insecureSkipVerify }}
+      username: {{ .origin.username }}
+      # cookie: Origin-Cookie-Name=CCCOOOKKKIIIEEE
+
+    # replicas instances
+    replicas:
+      {{- range $idx, $r := (.replicas | default list) }}
+      - url: {{ $r.url }}
+        username: {{ $r.username }}
+        autoSetup: {{ $r.autoSetup | default true }}
+        webURL: {{ $r.webURL | default $r.url }}
+      {{- end }}
+
+    # Configure the sync API server, disabled if api port is 0
+    api:
+      {{- if .api.enabled }}
+      port: {{ .api.port | default 8080 }}
+      username: {{ .api.username }}
+      # enable api dark mode
+      darkMode: {{ .api.darkMode }}
+      {{- end }}
+      {{- if .api.metrics.enabled }}
+      metrics:
+        enabled: true
+        scrapeInterval: {{ .api.metrics.scrapeInterval }} 
+        queryLogLimit: {{ .api.metrics.queryLogLimit }} 
+      {{- end }}
+    # Configure sync features; by default all features are enabled.
+    features:
+      generalSettings: true
+      queryLogConfig: true
+      statsConfig: true
+      clientSettings: true
+      services: true
+      filters: true
+      dhcp:
+        serverConfig: true
+        staticLeases: true
+      dns:
+        serverConfig: true
+        accessLists: true
+        rewrites: true
+    {{- end }}
