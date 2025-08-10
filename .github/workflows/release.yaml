@@ -1,9 +1,7 @@
 name: Release Helm Chart
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     tags:
       - 'v*'
     branches:
