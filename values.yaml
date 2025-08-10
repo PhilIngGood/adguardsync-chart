@@ -107,6 +107,16 @@ config:
       autosetup: true
       webURL: ""
 
+
+    # - url: http://replica2
+    #   username: username
+    #   password:
+    #     secretKeyRef:
+    #       name: "adh-sync-secret"
+    #       key: "replica2"
+    #   autosetup: true
+    #   webURL: ""
+
   api:
     enabled: true
     # Port, default 8080
