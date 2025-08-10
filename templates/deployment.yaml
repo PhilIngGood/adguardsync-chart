@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "adguard_sync.fullname" . }}
+  labels:
+    {{- include "adguard_sync.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "adguard_sync.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "adguard_sync.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "adguard_sync.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - image: {{ .Values.image.repository }}
+        name: {{ .Chart.Name }}
+        resources: {{ toYaml .Values.resources | nindent 10 }}
+        {{- with .Values.config }}
+        env:
+          - name: ORIGIN_PASSWORD
+            valueFrom:
+              {{- toYaml .origin.password | nindent 14 }}
+          {{- range $idx, $r := (.replicas | default list) }}
+          - name: {{ printf "REPLICA%s_PASSWORD" (add $idx 1 | toString) }}
+            valueFrom:
+              {{- toYaml $r.password | nindent 14 }}
+          {{- end }}
+          - name: API_PASSWORD
+            valueFrom:
+              {{- toYaml .api.password | nindent 14 }}
+        {{- end }}
+        ports:
+          - containerPort: {{ .Values.config.api.port }}
+            protocol: TCP
+            name: http
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config/adguardhome-sync.yaml
+          subPath: adguardhome-sync.yaml
+      volumes:
+        - name: config-volume
+          configMap: 
+            name: adguard-sync-config
+status: {}

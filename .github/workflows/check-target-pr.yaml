@@ -1,0 +1,40 @@
+name: Check PR Target Branch
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+
+jobs:
+  check-feature-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is from a feature branch and targets develop
+        if: |
+          startsWith(github.head_ref, 'feature/') &&
+          github.base_ref != 'develop'
+        run: |
+          echo "This PR is from a feature branch but does not target the develop branch."
+          exit 1
+  
+  check-release-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is from a release branch and targets develop
+        if: |
+          startsWith(github.head_ref, 'release/') &&
+          github.base_ref != 'main'
+        run: |
+          echo "This PR is from a release branch but does not target the main branch."
+          exit 1
+
+
+  check-hotfix-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is from a hotfix branch and targets develop
+        if: |
+          startsWith(github.head_ref, 'hotfix/') &&
+          github.base_ref != 'main' && github.base_ref != 'develop'
+        run: |
+          echo "This PR is from a hotfix branch but does not target the main or develop branch."
+          exit 1

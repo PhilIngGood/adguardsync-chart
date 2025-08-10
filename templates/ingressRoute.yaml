@@ -1,0 +1,17 @@
+{{- if .Values.ingressRoute.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "adguard_sync.fullname" . | nindent 4 }}
+  labels: {{ include "adguard_sync.labels" . | nindent 4 }}
+  annotations: {{ toYaml .Values.ingressRoute.annotations | default dict }}
+spec:
+  entryPoints:
+    {{ toYaml .Values.ingressRoute.entrypoints }}
+  routes:
+  - kind: Rule
+    match: {{ .Values.ingressRoute.match | default "" }}
+    services:
+    - name: {{ include "adguard_sync.fullname" . }}
+      port: http
+{{ end }}
