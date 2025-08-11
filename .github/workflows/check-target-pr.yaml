@@ -15,3 +15,13 @@ jobs:
         run: |
           echo "PR to main must be coming from a release or hotfix branch."
           exit 1
+  check-feature-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is from a feature branch and targets develop
+        if: |
+          (startsWith(github.head_ref, 'feature/') &&
+          github.base_ref != 'develop'
+        run: |
+          echo "A feature branch must be merge to develop."
+          exit 1
