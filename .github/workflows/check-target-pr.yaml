@@ -18,7 +18,7 @@ jobs:
   check-feature-branch:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if PR is from a release branch and targets main
+      - name: Check if PR is from a feature branch and targets develop
         if: |
           (startsWith(github.head_ref, 'feature/') &&
           github.base_ref != 'develop'
