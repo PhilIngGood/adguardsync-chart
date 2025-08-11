@@ -2,7 +2,7 @@ name: Check PR Target Branch
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, edited]
+    types: [opened, reopened]
 
 jobs:
   check-release-branch:
@@ -10,8 +10,8 @@ jobs:
     steps:
       - name: Check if PR is from a release branch and targets main
         if: |
-          !(startsWith(github.head_ref, 'release/')) &&
+          !(startsWith(github.head_ref, 'release/') ||  !(startsWith(github.head_ref, 'hotfix/')) &&
           github.base_ref == 'main'
         run: |
-          echo "PR to main must be coming from a release branch."
+          echo "PR to main must be coming from a release or hotfix branch."
           exit 1
